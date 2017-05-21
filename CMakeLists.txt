@@ -1,4 +1,11 @@
 cmake_minimum_required(VERSION 3.1.0)
+
+include("cmake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/ruslo/hunter/archive/v0.18.63.tar.gz"
+    SHA1 "25d6a7077478ea201639ed95c353a4166b2c0407"
+)
+
 project(onmt)
 
 option(LIB_ONLY "Do not compile clients" OFF)
@@ -37,24 +44,56 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
 
+####
+# Installation (https://github.com/forexample/package-example) {
+
+set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(include_install_dir "include")
+
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(targets_export_name "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+include(CMakePackageConfigHelpers)
+
+# Use:
+#   * targets_export_name
+#   * PROJECT_NAME
+configure_package_config_file(
+    "cmake/Config.cmake.in"
+    "${project_config}"
+    INSTALL_DESTINATION "${config_install_dir}"
+)
+
+install(
+    FILES "${project_config}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(
+    EXPORT "${targets_export_name}"
+    NAMESPACE "${namespace}"
+    DESTINATION "${config_install_dir}"
+)
+
+# }
+
+hunter_add_package(Eigen)
+find_package(Eigen3 3.3 CONFIG REQUIRED)
+
 add_subdirectory(lib/TH)
-add_subdirectory(lib/tokenizer)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+hunter_add_package(OpenNMTTokenizer)
+find_package(OpenNMTTokenizer CONFIG REQUIRED)
 
-if (EIGEN_ROOT)
-  set(ENV{EIGEN3_ROOT} ${EIGEN_ROOT})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
+if(NOT HUNTER_ENABLED)
+  find_package(CUDA 6.5 QUIET)
 endif()
 
-find_package(Eigen3 3.3 REQUIRED)
-find_package(CUDA 6.5 QUIET)
-
-set(INCLUDE_DIRECTORIES
-  ${CMAKE_CURRENT_SOURCE_DIR}/lib
-  ${CMAKE_CURRENT_SOURCE_DIR}/lib/tokenizer/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${EIGEN3_INCLUDE_DIR}
-  )
 set(SOURCES
   src/th/Env.cc
   src/th/Obj.cc
@@ -80,21 +119,30 @@ else()
   add_library(${PROJECT_NAME} ${SOURCES})
 endif()
 
-target_link_libraries(${PROJECT_NAME}
-  OpenNMTTokenizer
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  OpenNMTTokenizer::OpenNMTTokenizer
   TH)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
+target_include_directories(
+    ${PROJECT_NAME}
+    PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/lib>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+)
 
 if (NOT LIB_ONLY)
   add_subdirectory(cli)
 endif()
 
 install(
-  TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib/
-  LIBRARY DESTINATION lib/
-  )
+    TARGETS ${PROJECT_NAME}
+    EXPORT "${targets_export_name}"
+    LIBRARY DESTINATION "lib"
+    ARCHIVE DESTINATION "lib"
+    RUNTIME DESTINATION "bin"
+    INCLUDES DESTINATION "${include_install_dir}"
+)
+
 install(
   DIRECTORY include/onmt
   DESTINATION include
