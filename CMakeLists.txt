@@ -30,14 +30,6 @@ if(WITH_OPENMP)
   endif()
 endif()
 
-if(ANDROID)
-  set(LIB_ONLY ON)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  if(ANDROID_STL MATCHES "gnustl")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DANDROID_GNUSTL_COMPAT")
-  endif()
-endif()
-
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
 else()
@@ -122,6 +114,12 @@ endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC
   OpenNMTTokenizer::OpenNMTTokenizer
   TH)
+
+if(ANDROID)
+  if(ANDROID_STL MATCHES "gnustl")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC "ANDROID_GNUSTL_COMPAT")
+  endif()
+endif()
 
 target_include_directories(
     ${PROJECT_NAME}
