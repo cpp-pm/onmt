@@ -556,8 +556,13 @@ static int THPipeFile_mode(const char *mode, int *isReadable, int *isWritable)
 static void THPipeFile_free(THFile *self)
 {
   THDiskFile *dfself = (THDiskFile*)(self);
-  if(dfself->handle)
+  if(dfself->handle) {
+#ifdef _WIN32
+    _pclose(dfself->handle);
+#else
     pclose(dfself->handle);
+#endif
+  }
   THFree(dfself->name);
   THFree(dfself);
 }
