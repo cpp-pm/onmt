@@ -17,15 +17,7 @@
 # define TH_EXTERNC extern
 #endif
 
-#ifdef _WIN32
-# ifdef TH_EXPORTS
-#  define TH_API TH_EXTERNC __declspec(dllexport)
-# else
-#  define TH_API TH_EXTERNC __declspec(dllimport)
-# endif
-#else
-# define TH_API TH_EXTERNC
-#endif
+#define TH_API TH_EXTERNC
 
 TH_API void _THError(const char *file, const int line, const char *fmt, ...);
 TH_API void _THAssertionFailed(const char *file, const int line, const char *exp, const char *fmt, ...);
