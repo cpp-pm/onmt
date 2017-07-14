@@ -16,6 +16,14 @@ add_library(TH
 
 target_link_libraries(TH PUBLIC Eigen3::Eigen)
 
+option(ONMT_WITH_AES "Enable 'aes' support" OFF)
+
+if(ONMT_WITH_AES)
+  hunter_add_package(aes)
+  find_package(aes CONFIG REQUIRED)
+  target_link_libraries(TH PUBLIC aes::aes)
+endif()
+
 install(
     TARGETS TH
     EXPORT "${targets_export_name}"
