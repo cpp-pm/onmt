@@ -2,14 +2,16 @@ cmake_minimum_required(VERSION 3.1.0)
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.18.63.tar.gz"
-    SHA1 "25d6a7077478ea201639ed95c353a4166b2c0407"
+    URL "https://github.com/ruslo/hunter/archive/v0.18.66.tar.gz"
+    SHA1 "26028d26e2a9e0496fd7c896fa04e05b309ab6fd"
 )
 
 project(onmt)
 
 option(LIB_ONLY "Do not compile clients" OFF)
 option(WITH_OPENMP "Use OpenMP if available" ON)
+option(WITH_CUDA "Use CUDA if available" ON)
+option(WITH_MKL "Use Intel® MKL if available" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -98,9 +100,19 @@ set(SOURCES
   src/TranslationResult.cc
   src/Threads.cc
   )
+set(LIBRARIES
+  OpenNMTTokenizer
+  TH)
+
+if (MKL_FOUND)
+  add_definitions(-DEIGEN_USE_MKL_ALL)
+  list(APPEND INCLUDE_DIRECTORIES ${MKL_INCLUDE_DIR})
+  list(APPEND LIBRARIES ${MKL_LIBRARIES})
+endif()
 
 if (CUDA_FOUND)
   add_definitions(-DWITH_CUDA)
+  cuda_include_directories(${INCLUDE_DIRECTORIES})
   cuda_add_library(${PROJECT_NAME}
     ${SOURCES}
     src/cuda/Utils.cc
