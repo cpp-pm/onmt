@@ -2,6 +2,8 @@
 
 #include <Eigen/Dense>
 
+#include <vector>
+
 namespace onmt
 {
   namespace Eigen
