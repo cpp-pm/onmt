@@ -62,7 +62,7 @@ namespace onmt
       MatrixBatchBase<T> batch(size_t b) const
       {
         if (_ndim == 3)
-          return Map<const MatrixBatchBase<T> >(this->row(b).data(), _rows, _cols);
+          return ::Eigen::Map<const MatrixBatchBase<T> >(this->row(b).data(), _rows, _cols);
         else
           return this->row(b);
       }
@@ -84,7 +84,7 @@ namespace onmt
 
         for (size_t b = 0; b < this->batches(); ++b)
         {
-          Map<const MatrixBatchBase<T> > mat(this->row(b).data(), _rows, _cols);
+          ::Eigen::Map<const MatrixBatchBase<T> > mat(this->row(b).data(), _rows, _cols);
           if (dimension == 2)
             out.row(b).noalias() = mat.colwise().sum();
           else if (dimension == 3)
