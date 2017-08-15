@@ -100,14 +100,10 @@ set(SOURCES
   src/TranslationResult.cc
   src/Threads.cc
   )
-set(LIBRARIES
-  OpenNMTTokenizer
-  TH)
 
 if (MKL_FOUND)
   add_definitions(-DEIGEN_USE_MKL_ALL)
   list(APPEND INCLUDE_DIRECTORIES ${MKL_INCLUDE_DIR})
-  list(APPEND LIBRARIES ${MKL_LIBRARIES})
 endif()
 
 if (CUDA_FOUND)
