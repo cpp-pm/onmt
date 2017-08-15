@@ -79,8 +79,10 @@ find_package(Eigen3 3.3 CONFIG REQUIRED)
 
 add_subdirectory(lib/TH)
 
-hunter_add_package(OpenNMTTokenizer)
-find_package(OpenNMTTokenizer CONFIG REQUIRED)
+if(NOT TARGET OpenNMTTokenizer::OpenNMTTokenizer)
+  hunter_add_package(OpenNMTTokenizer)
+  find_package(OpenNMTTokenizer CONFIG REQUIRED)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
